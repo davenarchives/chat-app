@@ -5,6 +5,8 @@ import { auth } from "./firebase";
 import SignIn from "./components/SignIn";
 import ChatRoom from "./components/ChatRoom";
 
+const CHATTROOM_LOGO = "/chattroom-logo.png";
+
 function App() {
   const [user, setUser] = useState(null);
   const [authInitializing, setAuthInitializing] = useState(true);
@@ -48,7 +50,14 @@ function App() {
     return (
       <div className="App">
         <div className="auth">
-          <h1 className="auth__title">Welcome to the Chat App</h1>
+          <div className="auth__brand">
+            <img
+              src={CHATTROOM_LOGO}
+              alt="ChattRoom logo"
+              className="auth__logo"
+            />
+            <h1 className="auth__title">Welcome to ChattRoom</h1>
+          </div>
           <p className="auth__subtitle">Sign in with Google to start chatting with your friends.</p>
           {authError && <p className="auth__error">{authError}</p>}
           <SignIn />

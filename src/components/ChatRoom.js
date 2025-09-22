@@ -4,6 +4,8 @@ import { db } from "../firebase";
 import ChatMessage from "./ChatMessage";
 import SendMessage from "./SendMessage";
 
+const CHATTROOM_LOGO = "/chattroom-logo.png";
+
 function ChatRoom({ user, onSignOut }) {
   const [messages, setMessages] = useState([]);
   const messagesEndRef = useRef(null);
@@ -35,9 +37,16 @@ function ChatRoom({ user, onSignOut }) {
       style={{ display: "flex", flexDirection: "column", height: "100%", maxHeight: "100%", width: "100%" }}
     >
       <header className="chat-room__header" style={{ flexShrink: 0 }}>
-        <div>
-          <h1 className="chat-room__title">Chat Room</h1>
-          <p className="chat-room__subtitle">Chatting as {displayName}</p>
+        <div className="chat-room__brand">
+          <img
+            src={CHATTROOM_LOGO}
+            alt="ChattRoom logo"
+            className="chat-room__logo"
+          />
+          <div>
+            <h1 className="chat-room__title">ChattRoom</h1>
+            <p className="chat-room__subtitle">Chatting as {displayName}</p>
+          </div>
         </div>
         <button type="button" className="chat-room__signout" onClick={onSignOut}>
           Sign out

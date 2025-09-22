@@ -56,8 +56,26 @@ body {
 }
 
 .auth__title {
-  margin: 0 0 8px;
+  margin: 0;
   font-size: clamp(1.8rem, 2.8vw, 2.4rem);
+}
+
+.auth__brand {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.auth__logo {
+  width: 88px;
+  height: 88px;
+  border-radius: 22px;
+  object-fit: cover;
+  background: rgba(15, 23, 42, 0.6);
+  padding: 12px;
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.38);
 }
 
 .auth__subtitle {
@@ -117,6 +135,22 @@ body {
   justify-content: space-between;
   padding: clamp(20px, 4vw, 28px) clamp(24px, 4vw, 36px);
   border-bottom: 1px solid var(--border-subtle);
+}
+
+.chat-room__brand {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.chat-room__logo {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  object-fit: cover;
+  background: rgba(15, 23, 42, 0.6);
+  padding: 6px;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.35);
 }
 
 .chat-room__title {
