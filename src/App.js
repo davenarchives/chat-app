@@ -36,23 +36,56 @@ function App() {
     }
   };
 
-  return (
-    <div className="App">
-      {authInitializing ? (
+  if (authInitializing) {
+    return (
+      <div className="App">
         <div className="App__loading">Loading...</div>
-      ) : !user ? (
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="App">
         <div className="auth">
           <h1 className="auth__title">Welcome to the Chat App</h1>
           <p className="auth__subtitle">Sign in with Google to start chatting with your friends.</p>
           {authError && <p className="auth__error">{authError}</p>}
           <SignIn />
         </div>
-      ) : (
-        <>
-          {authError && <p className="auth__error">{authError}</p>}
+      </div>
+    );
+  }
+
+  return (
+    <div
+      style={{
+        position: "fixed",
+        inset: 0,
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "stretch",
+        padding: "clamp(16px, 4vw, 24px)",
+        boxSizing: "border-box",
+        overflow: "hidden",
+      }}
+    >
+      <div
+        style={{
+          width: "min(960px, 100%)",
+          display: "flex",
+          flexDirection: "column",
+        }}
+      >
+        {authError && (
+          <p className="auth__error" style={{ marginBottom: "16px" }}>
+            {authError}
+          </p>
+        )}
+        <div style={{ flex: "1 1 auto", display: "flex", width: "100%", overflow: "hidden" }}>
           <ChatRoom user={user} onSignOut={handleSignOut} />
-        </>
-      )}
+        </div>
+      </div>
     </div>
   );
 }

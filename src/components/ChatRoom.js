@@ -30,8 +30,11 @@ function ChatRoom({ user, onSignOut }) {
   const displayName = user?.displayName || user?.email || "Friend";
 
   return (
-    <div className="chat-room">
-      <header className="chat-room__header">
+    <div
+      className="chat-room"
+      style={{ display: "flex", flexDirection: "column", height: "100%", maxHeight: "100%", width: "100%" }}
+    >
+      <header className="chat-room__header" style={{ flexShrink: 0 }}>
         <div>
           <h1 className="chat-room__title">Chat Room</h1>
           <p className="chat-room__subtitle">Chatting as {displayName}</p>
@@ -41,14 +44,21 @@ function ChatRoom({ user, onSignOut }) {
         </button>
       </header>
 
-      <section className="chat-room__messages" aria-live="polite" aria-label="Chat messages">
+      <section
+        className="chat-room__messages"
+        aria-live="polite"
+        aria-label="Chat messages"
+        style={{ flex: "1 1 auto", overflowY: "auto", minHeight: 0 }}
+      >
         {messages.map(message => (
           <ChatMessage key={message.id} message={message} currentUser={user} />
         ))}
         <div ref={messagesEndRef} />
       </section>
 
-      <SendMessage user={user} />
+      <div style={{ flexShrink: 0 }}>
+        <SendMessage user={user} />
+      </div>
     </div>
   );
 }
