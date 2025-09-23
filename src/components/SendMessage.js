@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { db } from "../firebase";
+import { censorText } from "../utils/profanity";
 
 function SendMessage({ user }) {
   const [text, setText] = useState("");
@@ -12,15 +13,30 @@ function SendMessage({ user }) {
     event.preventDefault();
     if (!canSend) return;
 
+    const originalText = text.trim();
+    const cleanedText = censorText(originalText);
+    if (!cleanedText) {
+      setText("");
+      return;
+    }
+
+    const createdAt = serverTimestamp();
+    const messagePayload = {
+      text: cleanedText,
+      createdAt,
+      uid: user.uid,
+      photoURL: user.photoURL,
+      displayName: user.displayName || user.email,
+    };
+
+    if (cleanedText !== originalText) {
+      messagePayload.flagged = true;
+      messagePayload.cleanedAt = createdAt;
+    }
+
     try {
       setIsSending(true);
-      await addDoc(collection(db, "messages"), {
-        text: text.trim(),
-        createdAt: serverTimestamp(),
-        uid: user.uid,
-        photoURL: user.photoURL,
-        displayName: user.displayName || user.email,
-      });
+      await addDoc(collection(db, "messages"), messagePayload);
       setText("");
     } catch (error) {
       console.error("Failed to send message", error);
