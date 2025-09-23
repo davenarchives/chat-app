@@ -1,70 +1,125 @@
-# Getting Started with Create React App
+﻿# ChattRoom
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+ChattRoom is a real-time group chat experience built with React and Firebase. It features Google Authentication, Firestore-backed messaging, aggressive profanity filtering, and a companion Cloud Function that keeps the history tidy. The project is configured for Firebase Hosting and Functions so you can deploy a production-ready chat in minutes.
 
-## Available Scripts
+## Features
+- Google Sign-In via Firebase Authentication with graceful loading and error states
+- Real-time Firestore listeners that stream the latest messages without manual refreshes
+- Dual-layer profanity filtering (client utility and Cloud Function) that sanitizes text and tracks flagged users
+- Message history automatically pruned to the most recent 25 entries to keep the room fast
+- Accessible, responsive UI with avatar fallbacks, smooth autoscroll, and status messaging
+- Tested authentication flow with React Testing Library mocks for Firebase services
 
-In the project directory, you can run:
+## Tech Stack
+- React 19 (Create React App tooling)
+- Firebase Web SDK (Authentication, Firestore)
+- Firebase Cloud Functions (Node.js 22 runtime)
+- Firebase Hosting plus Firestore security rules
+- bad-words profanity filter shared between client and functions
+- Jest plus React Testing Library for unit and integration tests
 
-### `npm start`
+## Project Structure
+```
+chat-app/
+|-- public/                     # Static assets served by CRA and Firebase Hosting
+|-- src/
+|   |-- components/             # ChatRoom, SendMessage, ChatMessage, SignIn UI logic
+|   |-- utils/                  # Shared helpers (profanity filter wrapper)
+|   |-- App.js / App.css        # App shell, authentication state handling, layout styles
+|   `-- firebase.js             # Firebase client initialization
+|-- functions/                  # Firebase Cloud Functions codebase
+|   |-- index.js                # detectEvilUsers trigger for profanity and pruning
+|   `-- package.json            # Node 22 runtime, lint and deploy scripts
+|-- firestore.rules             # Security rules guarding the messages collection
+|-- firebase.json               # Hosting and Functions deployment config
+`-- README.md                   # Project documentation (this file)
+```
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+## Prerequisites
+- Node.js 18 or newer installed locally (Functions deploy targets Node 22 and requires npm 8 or newer)
+- Firebase CLI (`npm install -g firebase-tools`)
+- A Firebase project with Firestore and Authentication enabled
+- Google sign-in provider enabled in the Firebase Console
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## Firebase Setup
+1. Create or select a Firebase project in the [Firebase Console](https://console.firebase.google.com/).
+2. Enable Firestore in production or test mode as desired.
+3. Enable Authentication -> Sign-in method -> Google.
+4. In the project settings, create a Web App and copy the SDK configuration.
+5. Update `src/firebase.js` with your project's configuration block. The current values point to `chat-app-80356` and should be replaced for other environments.
+6. Deploy the security rules:
+   ```bash
+   firebase deploy --only firestore:rules
+   ```
+7. (Optional) Deploy the empty Firestore indexes (`firestore.indexes.json`) or manage them via the console if you add composite indexes later.
 
-### `npm test`
+## Local Development
+```bash
+# Install React app dependencies
+npm install
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+# Install Cloud Functions dependencies
+npm install --prefix functions
 
-### `npm run build`
+# Start the React development server (http://localhost:3000)
+npm start
+```
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+The app automatically connects to your configured Firebase project. When testing changes safely, consider the Firebase Emulator Suite:
+```bash
+# Serve Functions and Firestore emulators
+firebase emulators:start --only functions,firestore
+```
+Update `src/firebase.js` to point at your emulator instances when running offline (see the Firebase SDK docs for `connectFirestoreEmulator` and `connectAuthEmulator`).
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+## Cloud Functions
+- `functions/index.js` exports a single trigger, `detectEvilUsers`, that runs on every new document in `messages/{messageId}`.
+- Responsibilities:
+  - Clean profane text with `bad-words`
+  - Flag messages that were sanitized and record offender stats in `flags/{uid}`
+  - Trim history to the most recent 25 messages using a batch delete
+  - Log pruning outcomes for observability
+- Lint locally with `npm run lint --prefix functions` before deploying.
+- Deploy only the function code with:
+  ```bash
+  firebase deploy --only functions
+  ```
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+## Firestore Data Model
+- `messages` collection documents:
+  - `text` (string, required)
+  - `uid` (string, Firebase Authentication user id)
+  - `displayName`, `photoURL`, `email` (optional metadata used for the UI)
+  - `createdAt` (Firestore timestamp, set client-side via `serverTimestamp`)
+  - `flagged` (boolean, added when profanity cleanup occurs)
+  - `cleanedAt` (timestamp, Functions adds when sanitizing text)
+- `flags` collection documents (written by Cloud Function):
+  - `count` (number of times the user was flagged)
+  - `lastFlaggedMessageId`
+  - `updatedAt`
 
-### `npm run eject`
+Security rules (`firestore.rules`) ensure only authenticated users can read messages, and they can only write new messages that belong to them with a server-side timestamp. Updates and deletes are disallowed from clients, so moderation relies on the Cloud Function.
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+## Testing
+```bash
+npm test
+```
+The test suite (`src/App.test.js`) mocks Firebase services to assert the authentication state transitions. Add component or integration tests alongside existing files within `src/`.
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+## Building and Deployment
+```bash
+# Production build for hosting
+npm run build
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+# Deploy hosting and functions (after logging in with firebase login)
+firebase deploy
+```
+`firebase.json` is preconfigured to serve the React build from `build/` and rewrite all routes to `index.html` for client-side routing. Update the hosting `site` value if you bind the project to a different Firebase Hosting target.
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+## Troubleshooting
+- **Authentication spinner never resolves**: verify that `onAuthStateChanged` is firing by checking the browser console. Ensure the Firebase config matches the project and the domain is whitelisted in the Firebase console.
+- **Messages missing or not updating**: confirm Firestore rules were deployed and that the authenticated user has permission to create documents.
+- **Profanity remains**: install dependencies in both the root and `functions/` directories and deploy the Cloud Function to apply server-side cleanup.
+- **Function deploy fails**: check you are using Node.js 18 or newer locally and that the Firebase CLI is updated. Run `npm run lint --prefix functions` for detailed ESLint feedback.
 
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+Happy chatting!
