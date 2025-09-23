@@ -5,6 +5,15 @@ import ChatMessage from "./ChatMessage";
 import SendMessage from "./SendMessage";
 
 const CHATTROOM_LOGO = "/chattroom-logo.png";
+const MESSAGE_LIMIT = 25;
+
+const getTimestampValue = (value) => {
+  if (!value) return 0;
+  if (typeof value.toMillis === "function") return value.toMillis();
+  if (typeof value.seconds === "number") return value.seconds * 1000;
+  if (value instanceof Date) return value.getTime();
+  return 0;
+};
 
 function ChatRoom({ user, onSignOut }) {
   const [messages, setMessages] = useState([]);
@@ -13,12 +22,14 @@ function ChatRoom({ user, onSignOut }) {
   useEffect(() => {
     const messagesQuery = query(
       collection(db, "messages"),
-      orderBy("createdAt"),
-      limit(200)
+      orderBy("createdAt", "desc"),
+      limit(MESSAGE_LIMIT)
     );
 
     const unsubscribe = onSnapshot(messagesQuery, snapshot => {
-      const nextMessages = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      const nextMessages = snapshot.docs
+        .map(doc => ({ id: doc.id, ...doc.data() }))
+        .sort((a, b) => getTimestampValue(a.createdAt) - getTimestampValue(b.createdAt));
       setMessages(nextMessages);
     });
 
