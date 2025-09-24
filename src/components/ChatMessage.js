@@ -1,3 +1,5 @@
+const FALLBACK_NAME = "Friend";
+
 function formatTimestamp(createdAt) {
   if (!createdAt) return null;
 
@@ -15,8 +17,15 @@ function formatTimestamp(createdAt) {
   }
 
   return {
-    dateLabel: dateValue.toLocaleDateString([], { month: "short", day: "numeric", year: "numeric" }),
-    timeLabel: dateValue.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+    dateLabel: dateValue.toLocaleDateString("en-US", {
+      month: "2-digit",
+      day: "2-digit",
+      year: "2-digit",
+    }),
+    timeLabel: dateValue.toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    }),
     isoValue: dateValue.toISOString(),
   };
 }
@@ -31,14 +40,32 @@ function getInitials(name) {
     .join("");
 }
 
+function getUsernameColor(name) {
+  const source = name || FALLBACK_NAME;
+  let hash = 0;
+  for (let index = 0; index < source.length; index += 1) {
+    hash = source.charCodeAt(index) + ((hash << 5) - hash);
+  }
+  const hue = Math.abs(hash) % 360;
+  return `hsl(${hue}, 65%, 62%)`;
+}
+
 function ChatMessage({ message = {}, currentUser }) {
   const isOwnMessage = message?.uid && currentUser?.uid === message.uid;
-  const authorLabel = message?.username || "Friend";
+  const authorLabel = message?.username || FALLBACK_NAME;
   const timestamp = formatTimestamp(message?.createdAt);
   const hasAvatar = Boolean(message?.photoURL);
+  const authorColor = getUsernameColor(authorLabel);
+  const tooltip = timestamp
+    ? `${authorLabel} - ${timestamp.dateLabel} ${timestamp.timeLabel}`
+    : authorLabel;
 
   return (
-    <article className={`chat-message ${isOwnMessage ? "chat-message--own" : "chat-message--other"}`}>
+    <article
+      className={`chat-message ${isOwnMessage ? "chat-message--own" : "chat-message--other"}`}
+      title={tooltip}
+      aria-label={tooltip}
+    >
       {hasAvatar ? (
         <img className="chat-message__avatar" src={message.photoURL} alt={`${authorLabel}'s avatar`} />
       ) : (
@@ -46,19 +73,24 @@ function ChatMessage({ message = {}, currentUser }) {
           {getInitials(authorLabel)}
         </div>
       )}
-      <div className="chat-message__content">
+      <div className="chat-message__body">
         <header className="chat-message__meta">
-          <span className="chat-message__author">{authorLabel}</span>
+          <span className="chat-message__author" style={{ color: authorColor }}>
+            {authorLabel}
+          </span>
           {timestamp && (
             <time className="chat-message__time" dateTime={timestamp.isoValue}>
-              {timestamp.dateLabel} at {timestamp.timeLabel}
+              {timestamp.dateLabel} {timestamp.timeLabel}
             </time>
           )}
         </header>
-        <p className="chat-message__text">{message?.text}</p>
+        <div className="chat-message__content">
+          <p className="chat-message__text">{message?.text}</p>
+        </div>
       </div>
     </article>
   );
 }
 
 export default ChatMessage;
+
