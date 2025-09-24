@@ -3,11 +3,12 @@ import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { db } from "../firebase";
 import { censorText } from "../utils/profanity";
 
-function SendMessage({ user }) {
+function SendMessage({ user, userProfile }) {
   const [text, setText] = useState("");
   const [isSending, setIsSending] = useState(false);
 
-  const canSend = text.trim().length > 0 && !isSending;
+  const username = userProfile?.username;
+  const canSend = text.trim().length > 0 && !isSending && Boolean(username);
 
   const sendMessage = async (event) => {
     event.preventDefault();
@@ -26,7 +27,7 @@ function SendMessage({ user }) {
       createdAt,
       uid: user.uid,
       photoURL: user.photoURL,
-      displayName: user.displayName || user.email,
+      username,
     };
 
     if (cleanedText !== originalText) {
@@ -51,9 +52,9 @@ function SendMessage({ user }) {
         className="send-message__input"
         value={text}
         onChange={(event) => setText(event.target.value)}
-        placeholder="Type a message..."
+        placeholder={username ? "Type a message..." : "Add a username to start chatting"}
         aria-label="Message"
-        disabled={isSending}
+        disabled={isSending || !username}
       />
       <button type="submit" className="send-message__button" disabled={!canSend}>
         {isSending ? "Sending..." : "Send"}

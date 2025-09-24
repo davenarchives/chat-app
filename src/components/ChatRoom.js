@@ -15,7 +15,7 @@ const getTimestampValue = (value) => {
   return 0;
 };
 
-function ChatRoom({ user, onSignOut }) {
+function ChatRoom({ user, userProfile, onSignOut }) {
   const [messages, setMessages] = useState([]);
   const messagesEndRef = useRef(null);
 
@@ -40,7 +40,7 @@ function ChatRoom({ user, onSignOut }) {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const displayName = user?.displayName || user?.email || "Friend";
+  const displayName = userProfile?.username || user?.displayName || user?.email || "Friend";
 
   return (
     <div
@@ -77,7 +77,7 @@ function ChatRoom({ user, onSignOut }) {
       </section>
 
       <div style={{ flexShrink: 0 }}>
-        <SendMessage user={user} />
+        <SendMessage user={user} userProfile={userProfile} />
       </div>
     </div>
   );
