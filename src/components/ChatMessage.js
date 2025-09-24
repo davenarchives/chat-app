@@ -74,17 +74,17 @@ function ChatMessage({ message = {}, currentUser }) {
         </div>
       )}
       <div className="chat-message__body">
-        <header className="chat-message__meta">
-          <span className="chat-message__author" style={{ color: authorColor }}>
-            {authorLabel}
-          </span>
-          {timestamp && (
-            <time className="chat-message__time" dateTime={timestamp.isoValue}>
-              {timestamp.dateLabel} {timestamp.timeLabel}
-            </time>
-          )}
-        </header>
         <div className="chat-message__content">
+          <header className="chat-message__meta">
+            <span className="chat-message__author" style={{ color: authorColor }}>
+              {authorLabel}
+            </span>
+            {timestamp && (
+              <time className="chat-message__time" dateTime={timestamp.isoValue}>
+                {timestamp.dateLabel} {timestamp.timeLabel}
+              </time>
+            )}
+          </header>
           <p className="chat-message__text">{message?.text}</p>
         </div>
       </div>
@@ -93,4 +93,3 @@ function ChatMessage({ message = {}, currentUser }) {
 }
 
 export default ChatMessage;
-
