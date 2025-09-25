@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { collection, limit, onSnapshot, orderBy, query } from "firebase/firestore";
-import { FiChevronDown, FiLogOut, FiSettings, FiUser, FiX } from "react-icons/fi";
+import { FiLogOut, FiSettings, FiUser, FiX } from "react-icons/fi";
 import { db } from "../firebase";
 import ChatMessage from "./ChatMessage";
 import SendMessage from "./SendMessage";
@@ -187,18 +187,17 @@ function ChatRoom({
                 {avatarFallback}
               </span>
             )}
-            <FiChevronDown aria-hidden="true" />
           </button>
 
           {isMenuOpen && (
             <div className="chat-room__menu" role="menu">
-              <button type="button" className="chat-room__menu-item" role="menuitem" onClick={openAccountPanel}>
+              <div className="chat-room__menu-profile" role="presentation">
                 <FiUser aria-hidden="true" />
                 <div className="chat-room__menu-text">
                   <span className="chat-room__menu-label">{accountName}</span>
-                  {accountEmail && <span className="chat-room__menu-muted">{accountEmail}</span>}
+                  <span className="chat-room__menu-muted">{userProfile?.username || displayName}</span>
                 </div>
-              </button>
+              </div>
               <button type="button" className="chat-room__menu-item" role="menuitem" onClick={openAccountPanel}>
                 <FiSettings aria-hidden="true" />
                 <span className="chat-room__menu-label">Manage account</span>
@@ -324,3 +323,4 @@ function ChatRoom({
 }
 
 export default ChatRoom;
+
