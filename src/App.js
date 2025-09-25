@@ -246,7 +246,16 @@ function App() {
           </p>
         )}
         <div style={{ flex: "1 1 auto", display: "flex", width: "100%", overflow: "hidden" }}>
-          <ChatRoom user={user} userProfile={profile} onSignOut={handleSignOut} />
+          <ChatRoom
+            user={user}
+            userProfile={profile}
+            onSignOut={handleSignOut}
+            onSubmitUsername={handleUsernameSubmit}
+            onResetUsernameError={handleResetUsernameError}
+            isSavingUsername={isSavingUsername}
+            usernameError={usernameError || profileFetchError}
+            suggestedUsername={suggestedUsername}
+          />
         </div>
       </div>
     </div>
@@ -254,7 +263,3 @@ function App() {
 }
 
 export default App;
-
-
-
-
