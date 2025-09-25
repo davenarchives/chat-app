@@ -50,11 +50,14 @@ function getUsernameColor(name) {
   return `hsl(${hue}, 65%, 62%)`;
 }
 
-function ChatMessage({ message = {}, currentUser }) {
+function ChatMessage({ message = {}, currentUser, profileOverrides = {} }) {
   const isOwnMessage = message?.uid && currentUser?.uid === message.uid;
-  const authorLabel = message?.username || FALLBACK_NAME;
+  const overrideUsername = profileOverrides?.username;
+  const overridePhotoURL = profileOverrides?.photoURL;
+  const authorLabel = overrideUsername || message?.username || FALLBACK_NAME;
   const timestamp = formatTimestamp(message?.createdAt);
-  const hasAvatar = Boolean(message?.photoURL);
+  const displayPhotoURL = overridePhotoURL ?? message?.photoURL;
+  const hasAvatar = Boolean(displayPhotoURL);
   const authorColor = getUsernameColor(authorLabel);
   const tooltip = timestamp
     ? `${authorLabel} - ${timestamp.dateLabel} ${timestamp.timeLabel}`
@@ -67,7 +70,7 @@ function ChatMessage({ message = {}, currentUser }) {
       aria-label={tooltip}
     >
       {hasAvatar ? (
-        <img className="chat-message__avatar" src={message.photoURL} alt={`${authorLabel}'s avatar`} />
+        <img className="chat-message__avatar" src={displayPhotoURL} alt={`${authorLabel}'s avatar`} />
       ) : (
         <div className="chat-message__avatar chat-message__avatar--placeholder" aria-hidden="true">
           {getInitials(authorLabel)}

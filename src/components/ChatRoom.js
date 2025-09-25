@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useRef, useState } from "react";
-import { collection, limit, onSnapshot, orderBy, query } from "firebase/firestore";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { collection, doc, limit, onSnapshot, orderBy, query } from "firebase/firestore";
 import { FiLogOut, FiSettings, FiUser, FiX } from "react-icons/fi";
 import { db } from "../firebase";
 import ChatMessage from "./ChatMessage";
@@ -35,6 +35,8 @@ function ChatRoom({
   const [isEditingUsername, setIsEditingUsername] = useState(false);
   const [usernameDraft, setUsernameDraft] = useState(userProfile?.username ?? suggestedUsername ?? "");
   const pendingUsernameRef = useRef("");
+  const [profileCache, setProfileCache] = useState({});
+  const profileSubscriptionsRef = useRef({});
 
   useEffect(() => {
     const messagesQuery = query(
@@ -60,6 +62,29 @@ function ChatRoom({
   useEffect(() => {
     setUsernameDraft(userProfile?.username ?? suggestedUsername ?? "");
   }, [userProfile?.username, suggestedUsername]);
+
+  useEffect(() => {
+    if (!user?.uid) return;
+
+    setProfileCache(prev => {
+      const existing = prev[user.uid] || {};
+      const next = {
+        username: userProfile?.username || null,
+        displayName: user?.displayName || null,
+        photoURL: userProfile?.photoURL || user?.photoURL || null,
+      };
+
+      const isSame = existing.username === next.username
+        && existing.displayName === next.displayName
+        && existing.photoURL === next.photoURL;
+
+      if (isSame) {
+        return prev;
+      }
+
+      return { ...prev, [user.uid]: next };
+    });
+  }, [user?.uid, user?.displayName, user?.photoURL, userProfile?.username, userProfile?.photoURL]);
 
   useEffect(() => {
     if (!isMenuOpen) return undefined;
@@ -104,6 +129,33 @@ function ChatRoom({
     }
   }, [isEditingUsername, isSavingUsername, usernameError, userProfile?.username]);
 
+  useEffect(() => {
+    const subscriptions = profileSubscriptionsRef.current;
+
+    messages.forEach(message => {
+      const uid = message?.uid;
+      if (!uid || uid === user?.uid || subscriptions[uid]) {
+        return;
+      }
+
+      const userDocRef = doc(db, "users", uid);
+      subscriptions[uid] = onSnapshot(userDocRef, snapshot => {
+        setProfileCache(prev => ({
+          ...prev,
+          [uid]: snapshot.exists() ? { id: snapshot.id, ...snapshot.data() } : null,
+        }));
+      });
+    });
+  }, [messages, user?.uid]);
+
+  useEffect(() => () => {
+    Object.values(profileSubscriptionsRef.current).forEach(unsubscribe => {
+      if (typeof unsubscribe === "function") {
+        unsubscribe();
+      }
+    });
+    profileSubscriptionsRef.current = {};
+  }, []);
   const displayName = useMemo(() => {
     return userProfile?.username || user?.displayName || user?.email || "Friend";
   }, [userProfile?.username, user?.displayName, user?.email]);
@@ -115,6 +167,32 @@ function ChatRoom({
   const accountEmail = user?.email ?? "";
   const photoURL = userProfile?.photoURL || user?.photoURL || "";
   const avatarFallback = (displayName || "U").trim().charAt(0).toUpperCase();
+
+  const resolveProfileOverrides = useCallback(
+    (message) => {
+      if (!message?.uid) {
+        return {};
+      }
+
+      const cached = profileCache[message.uid];
+      if (cached) {
+        return {
+          username: cached.username || cached.displayName || message.username,
+          photoURL: cached.photoURL || message.photoURL,
+        };
+      }
+
+      if (message.uid === user?.uid) {
+        return {
+          username: userProfile?.username || message.username,
+          photoURL: userProfile?.photoURL || user?.photoURL || message.photoURL,
+        };
+      }
+
+      return {};
+    },
+    [profileCache, user?.uid, userProfile?.username, userProfile?.photoURL, user?.photoURL]
+  );
 
   const toggleMenu = () => {
     setIsMenuOpen(prev => !prev);
@@ -218,7 +296,12 @@ function ChatRoom({
         style={{ flex: "1 1 auto", overflowY: "auto", minHeight: 0 }}
       >
         {messages.map(message => (
-          <ChatMessage key={message.id} message={message} currentUser={user} />
+          <ChatMessage
+            key={message.id}
+            message={message}
+            currentUser={user}
+            profileOverrides={resolveProfileOverrides(message)}
+          />
         ))}
         <div ref={messagesEndRef} />
       </section>
@@ -316,4 +399,5 @@ function ChatRoom({
 }
 
 export default ChatRoom;
+
 
