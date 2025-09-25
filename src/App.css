@@ -975,15 +975,14 @@ body {
 }
 
 .account-drawer__link {
-  align-self: flex-start;
+  align-self: center;
   border: none;
   background: none;
   color: var(--accent);
   font-size: 0.9rem;
   cursor: pointer;
   padding: 0;
-  text-decoration: underline;
-  text-underline-offset: 4px;
+  text-decoration: none;
 }
 
 .account-drawer__row {

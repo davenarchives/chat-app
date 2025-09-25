@@ -308,13 +308,6 @@ function ChatRoom({
                 </form>
               )}
             </div>
-
-            <div className="account-drawer__section account-drawer__section--footer">
-              <button type="button" className="account-drawer__signout" onClick={onSignOut}>
-                <FiLogOut aria-hidden="true" />
-                Sign out
-              </button>
-            </div>
           </div>
         </div>
       )}
