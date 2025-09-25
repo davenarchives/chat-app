@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { IoSend } from "react-icons/io5";
 import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { db } from "../firebase";
 import { censorText } from "../utils/profanity";
@@ -56,8 +57,18 @@ function SendMessage({ user, userProfile }) {
         aria-label="Message"
         disabled={isSending || !username}
       />
-      <button type="submit" className="send-message__button" disabled={!canSend}>
-        {isSending ? "Sending..." : "Send"}
+      <button
+        type="submit"
+        className="send-message__button"
+        disabled={!canSend}
+        aria-label={isSending ? "Sending message" : "Send message"}
+        title={isSending ? "Sending message" : "Send message"}
+      >
+        {isSending ? (
+          <span className="send-message__spinner" aria-hidden="true" />
+        ) : (
+          <IoSend className="send-message__icon" aria-hidden="true" />
+        )}
       </button>
     </form>
   );
