@@ -1188,20 +1188,13 @@ body {
   }
 
   .chat-message {
-    max-width: 94%;
+    max-width: min(420px, 92vw);
     gap: 10px;
-  }
-
-  .chat-message__body {
-    width: 100%;
-    gap: 8px;
   }
 
   .chat-message__avatar {
     width: 36px;
     height: 36px;
-    align-self: flex-end;
-    margin-top: 0;
   }
 
   .chat-message__content {
@@ -1216,12 +1209,6 @@ body {
 
   .chat-message__meta {
     font-size: 0.72rem;
-    gap: 4px;
-    margin: 0 0 4px;
-  }
-
-  .chat-message--own .chat-message__meta {
-    margin: 6px 0 0;
   }
 
   .chat-message__author {
@@ -1230,7 +1217,6 @@ body {
 
   .chat-message__text {
     font-size: 0.97rem;
-    line-height: 1.45;
   }
 
   .chat-message__time {
