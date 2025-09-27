@@ -84,7 +84,7 @@ function ChatMessage({ message = {}, currentUser, profileOverrides = {} }) {
             </span>
             {timestamp && (
               <time className="chat-message__time" dateTime={timestamp.isoValue}>
-                {timestamp.dateLabel} {timestamp.timeLabel}
+                {timestamp.timeLabel}
               </time>
             )}
           </header>

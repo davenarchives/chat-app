@@ -1163,3 +1163,106 @@ body {
   font-size: 1.2rem;
   color: rgba(148, 163, 184, 0.85);
 }
+
+@media (max-width: 560px) {
+  .chat-room__messages {
+    padding: 16px 14px 22px;
+    gap: 12px;
+  }
+
+  .chat-message {
+    width: 100%;
+    max-width: 92%;
+    gap: 10px;
+  }
+
+  .chat-message--other {
+    margin-right: auto;
+  }
+
+  .chat-message--own {
+    margin-left: auto;
+    align-items: flex-end;
+  }
+
+  .chat-message__body {
+    width: 100%;
+    align-items: stretch;
+    gap: 6px;
+  }
+
+  .chat-message--own .chat-message__body {
+    align-items: flex-end;
+  }
+
+  .chat-message__avatar {
+    width: 36px;
+    height: 36px;
+    align-self: flex-end;
+    margin-top: 0;
+  }
+
+  .chat-message__content {
+    padding: 12px 16px;
+    gap: 8px;
+    background: rgba(15, 23, 42, 0.82);
+    border-radius: 18px 18px 18px 6px;
+    border: none;
+    box-shadow: 0 6px 20px rgba(5, 10, 22, 0.35);
+    max-width: min(320px, 85vw);
+  }
+
+  .chat-message--other .chat-message__content {
+    color: rgba(226, 232, 240, 0.94);
+  }
+
+  .chat-message--own .chat-message__content {
+    background: #2374e1;
+    color: #ffffff;
+    border-radius: 18px 18px 6px 18px;
+    box-shadow: 0 12px 30px rgba(35, 116, 225, 0.34);
+  }
+
+  .chat-message__text {
+    font-size: 0.98rem;
+    line-height: 1.4;
+    order: 1;
+  }
+
+  .chat-message__meta {
+    order: 2;
+    margin: 4px 0 0;
+    width: 100%;
+    font-size: 0.74rem;
+    display: flex;
+    gap: 6px;
+  }
+
+  .chat-message--other .chat-message__meta {
+    justify-content: flex-start;
+  }
+
+  .chat-message--own .chat-message__meta {
+    justify-content: flex-end;
+    color: rgba(255, 255, 255, 0.75);
+  }
+
+  .chat-message__author {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: rgba(226, 232, 240, 0.8);
+  }
+
+  .chat-message--own .chat-message__author {
+    display: none;
+  }
+
+  .chat-message__time {
+    font-size: 0.68rem;
+    color: rgba(148, 163, 184, 0.9);
+  }
+
+  .chat-message--own .chat-message__time {
+    color: rgba(255, 255, 255, 0.72);
+  }
+}
