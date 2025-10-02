@@ -2,6 +2,11 @@
 
 ChattRoom is a real-time group chat experience built with React and Firebase. It features Google Authentication, Firestore-backed messaging, aggressive profanity filtering, and a companion Cloud Function that keeps the history tidy. The project is configured for Firebase Hosting and Functions so you can deploy a production-ready chat in minutes.
 
+## Screenshots
+<img width="1829" height="910" alt="image" src="https://github.com/user-attachments/assets/31cb70c7-ad7c-4777-80c8-510f28eff9cf" />
+<img width="1830" height="920" alt="image" src="https://github.com/user-attachments/assets/76086b48-b0e6-4dda-80eb-b4deabbc5b10" />
+
+
 ## Features
 - Google Sign-In via Firebase Authentication with graceful loading and error states
 - Real-time Firestore listeners that stream the latest messages without manual refreshes
